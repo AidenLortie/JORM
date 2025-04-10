@@ -6,17 +6,31 @@ public class ColumnMeta {
     private Class<?> type;
     private boolean nullable;
     private boolean isPrimaryKey;
+    private boolean isForeignKey;
     private boolean autoIncrement;
     private boolean unique;
+    Class<?> referencedEntity;
 
-    public ColumnMeta(String name, String fieldName, Class<?> type, boolean nullable, boolean isPrimaryKey, boolean autoIncrement, boolean unique) {
+    public ColumnMeta(
+            String name,
+            String fieldName,
+            Class<?> type,
+            boolean nullable,
+            boolean isPrimaryKey,
+            boolean isForeignKey,
+            boolean autoIncrement,
+            boolean unique,
+            Class<?> referencedEntity
+    ) {
         this.name = name;
         this.fieldName = fieldName;
         this.type = type;
         this.nullable = nullable;
         this.isPrimaryKey = isPrimaryKey;
+        this.isForeignKey = isForeignKey;
         this.autoIncrement = autoIncrement;
         this.unique = unique;
+        this.referencedEntity = referencedEntity;
     }
 
     public String getName() {
@@ -59,6 +73,14 @@ public class ColumnMeta {
         isPrimaryKey = primaryKey;
     }
 
+    public boolean isForeignKey() {
+        return isForeignKey;
+    }
+
+    public void setForeignKey(boolean foreignKey) {
+        isForeignKey = foreignKey;
+    }
+
     public boolean isAutoIncrement() {
         return autoIncrement;
     }
@@ -73,5 +95,13 @@ public class ColumnMeta {
 
     public void setUnique(boolean unique) {
         this.unique = unique;
+    }
+
+    public Class<?> getReferencedEntity() {
+        return referencedEntity;
+    }
+
+    public void setReferencedEntity(Class<?> referencedEntity) {
+        this.referencedEntity = referencedEntity;
     }
 }

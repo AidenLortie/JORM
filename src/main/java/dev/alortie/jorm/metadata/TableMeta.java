@@ -15,10 +15,13 @@ public class TableMeta<T> {
     ColumnMeta[] columns;
     private final Class<T> entityClass;
 
-    public TableMeta(String tableName, ColumnMeta[] columns, Class<T> entityClass) {
+    final List<RelationshipMeta> relationships;
+
+    public TableMeta(String tableName, ColumnMeta[] columns, Class<T> entityClass, List<RelationshipMeta> relationships) {
         this.tableName = tableName;
         this.columns = columns;
         this.entityClass = entityClass;
+        this.relationships = relationships;
     }
 
     public String getTableName() {

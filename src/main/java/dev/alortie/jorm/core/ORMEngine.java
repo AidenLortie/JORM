@@ -51,8 +51,8 @@ public class ORMEngine {
         if (instance == null) {
             throw new IllegalStateException("ORMEngine is not initialized. Call setInstance() first.");
         }
-
-        for(TableMeta<?> tableMeta : entities) {
+        List<TableMeta<?>> sorted = SchemaManager.sortByDependency(entities);
+        for(TableMeta<?> tableMeta : sorted) {
             dbInterface.createTable(tableMeta);
         }
     }

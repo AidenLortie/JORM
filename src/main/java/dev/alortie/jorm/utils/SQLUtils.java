@@ -1,5 +1,6 @@
 package dev.alortie.jorm.utils;
 
+import dev.alortie.jorm.core.SchemaManager;
 import dev.alortie.jorm.metadata.ColumnMeta;
 import dev.alortie.jorm.metadata.TableMeta;
 
@@ -16,6 +17,12 @@ public class SQLUtils implements DBInterface{
         if (clazz == boolean.class || clazz == Boolean.class) return "BOOLEAN";
         if (clazz == long.class || clazz == Long.class) return "BIGINT";
         if (clazz == double.class || clazz == Double.class) return "DOUBLE";
+        if (clazz == float.class || clazz == Float.class) return "FLOAT";
+        if (clazz == short.class || clazz == Short.class) return "SMALLINT";
+        if (clazz == byte[].class) return "BLOB";
+        if (clazz == java.time.LocalDate.class) return "DATE";
+        if (clazz == java.time.LocalDateTime.class) return "DATETIME";
+
         // Add more as needed
         throw new IllegalArgumentException("Unsupported type: " + clazz.getName());
     }
@@ -37,19 +44,36 @@ public class SQLUtils implements DBInterface{
 
     private String generateCreateTableSQL(TableMeta<?> tableMeta) {
         StringBuilder sql = new StringBuilder("CREATE TABLE IF NOT EXISTS ");
+
         sql.append(databaseName).append(".").append(tableMeta.getTableName()).append(" (");
-        for (int i = 0; i < tableMeta.getColumns().length; i++) {
-            sql.append(tableMeta.getColumns()[i].getName()).append(" ").append(mapJavaTypeToSQLType(tableMeta.getColumns()[i].getType()));
-            if (tableMeta.getColumns()[i].isPrimaryKey()) {
-                sql.append(" PRIMARY KEY");
-            }
-            if (tableMeta.getColumns()[i].isAutoIncrement()) {
-                sql.append(" AUTO_INCREMENT");
-            }
-            if (i < tableMeta.getColumns().length - 1) {
+
+        int i = 0;
+        for (ColumnMeta column: tableMeta.getColumns()) {
+            sql.append(column.getName())
+                    .append(" ")
+                    .append(mapJavaTypeToSQLType(column.getType()));
+
+            if (column.isPrimaryKey()   )   sql.append(" PRIMARY KEY"   );
+            if (column.isAutoIncrement())   sql.append(" AUTO_INCREMENT");
+            if (column.isNullable()     )   sql.append(" NOT NULL"      );
+            if (column.isUnique()       )   sql.append(" UNIQUE"        );
+
+            if (i++ < tableMeta.getColumns().length - 1)
                 sql.append(", ");
+
+        }
+
+        // Add foreign key constraints
+        for (ColumnMeta column : tableMeta.getColumns()){
+            if (column.isForeignKey()) {
+                String pk = ReflectionUtils.getPrimaryKeyColumnName(column.getReferencedEntity());
+                String fk = ", FOREIGN KEY (" + column.getName() + ") REFERENCES " +
+                        SchemaManager.getTableNameForEntity(column.getReferencedEntity()) +
+                        "(" + pk + ")";
+                sql.append(fk);
             }
         }
+
         sql.append(");");
 
         Log.d("SQLUtils", "Generated SQL: " + sql.toString());
