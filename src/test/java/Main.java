@@ -11,7 +11,7 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        Log.setInstance(LogLevel.ERROR);
+        Log.setInstance(LogLevel.DEBUG);
         ORMEngine DB = ORMEngine.InitInstance(
                 new SQLUtils(
                         "jdbc:mysql://localhost:3306",
@@ -21,9 +21,17 @@ public class Main {
                 List.of(User.class, Message.class)
         );
 
+        User user = new User("testUser");
+        User user2 = new User("testUser2");
+        User user3 = new User("testUser3");
 
-        for (User u : DB.repository(User.class).selectAll()) {
-            Log.o().info("User: " + u.UserId, u.username);
+        DB.repository(User.class).insert(user);
+        DB.repository(User.class).insert(user2);
+        DB.repository(User.class).insert(user3);
+
+        for(User u : DB.repository(User.class).selectAll() ) {
+            System.out.println(u.userId + " " + u.username);
         }
+
     }
 }

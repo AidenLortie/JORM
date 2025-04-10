@@ -43,6 +43,9 @@ public class SQLUtils implements DBInterface{
             if (tableMeta.getColumns()[i].isPrimaryKey()) {
                 sql.append(" PRIMARY KEY");
             }
+            if (tableMeta.getColumns()[i].isAutoIncrement()) {
+                sql.append(" AUTO_INCREMENT");
+            }
             if (i < tableMeta.getColumns().length - 1) {
                 sql.append(", ");
             }
@@ -124,6 +127,8 @@ public class SQLUtils implements DBInterface{
         String placeholders = String.join(", ", columnNames.stream().map(col -> "?").toArray(String[]::new));
         String sql = "INSERT INTO " + databaseName + "." + tableName + " (" + joinedColumns + ") VALUES (" + placeholders + ")";
 
+
+        Log.d("SQLUtils", "Generated SQL: " + sql);
         try{
             connect();
             PreparedStatement stmt = connection.prepareStatement(sql);
@@ -140,14 +145,83 @@ public class SQLUtils implements DBInterface{
 
     @Override
     public void update(TableMeta<?> tableMeta, Object entity) {
-        System.out.println("Updating entity in table: " + tableMeta.getTableName());
-        System.out.println("Entity: " + entity);
+        Log.d("SQLUtils", "Updating entity in table: " + tableMeta.getTableName());
+        String tableName = tableMeta.getTableName();
+        List<String> assignments = new ArrayList<>();
+        List<Object> values = new ArrayList<>();
+        Object primaryKeyValue = null;
+
+        try {
+            for(ColumnMeta column : tableMeta.getColumns()){
+                Field field = entity.getClass().getDeclaredField(column.getFieldName());
+                field.setAccessible(true);
+                Object value = field.get(entity);
+
+                if(column.isPrimaryKey()){
+                    primaryKeyValue = value;
+                    continue; // Skip primary key column for assignment
+                }
+
+                if(!column.isAutoIncrement()) {
+                    assignments.add(column.getName() + " = ?");
+                    values.add(value);
+                }
+            }
+
+            if(primaryKeyValue == null) {
+                throw new RuntimeException("Primary key value is null");
+            }
+
+            String setClause = String.join(", ", assignments);
+            String sql = "UPDATE " + databaseName + "." + tableName + " SET " + setClause + " WHERE " + tableMeta.getPrimaryKeyColumn().getName() + " = ?";
+
+                connect();
+                PreparedStatement stmt = connection.prepareStatement(sql);
+                int i = 1;
+                for(Object value : values){
+                    stmt.setObject(i++, value);
+                }
+
+                stmt.setObject(i, primaryKeyValue);
+                stmt.executeUpdate();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update entity: " + e.getMessage());
+        } finally {
+            disconnect();
+        }
     }
 
     @Override
     public void delete(TableMeta<?> tableMeta, Object entity) {
-        System.out.println("Deleting entity from table: " + tableMeta.getTableName());
-        System.out.println("Entity: " + entity);
+        Log.d("SQLUtils", "Deleting entity from table: " + tableMeta.getTableName());
+        Object primaryKeyValue = null;
+
+        try {
+            for(ColumnMeta column : tableMeta.getColumns()){
+                Field field = entity.getClass().getDeclaredField(column.getFieldName());
+                field.setAccessible(true);
+                if(column.isPrimaryKey()){
+                    primaryKeyValue = field.get(entity);
+                    break;
+                }
+            }
+
+            if(primaryKeyValue == null) {
+                throw new RuntimeException("Primary key value is null");
+            }
+
+            String sql = "DELETE FROM " + databaseName + "." + tableMeta.getTableName() + " WHERE " + tableMeta.getPrimaryKeyColumn().getName() + " = ?";
+            connect();
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setObject(1, primaryKeyValue);
+            stmt.executeUpdate();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete entity: " + e.getMessage());
+        } finally {
+            disconnect();
+        }
     }
 
     @Override

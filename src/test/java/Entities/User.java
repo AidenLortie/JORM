@@ -7,16 +7,15 @@ import dev.alortie.jorm.annotations.PrimaryKey;
 @Entity(tableName = "user")
 public class User {
     @PrimaryKey
-    @Column(name = "id", nullable = false)
-    public String UserId;
+    @Column(name = "id", nullable = false, autoIncrement = true)
+    public Integer userId = 0;
 
-    @Column(name = "username")
+    @Column
     public String username;
 
     public User(){}
 
-    public User(String userId, String username) {
-        this.UserId = userId;
+    public User(String username) {
         this.username = username;
     }
 }

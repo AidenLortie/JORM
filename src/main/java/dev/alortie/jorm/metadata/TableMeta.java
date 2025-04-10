@@ -33,9 +33,29 @@ public class TableMeta<T> {
         return entityClass;
     }
 
+    public ColumnMeta getPrimaryKeyColumn() {
+        for (ColumnMeta column : columns) {
+            if (column.isPrimaryKey()) {
+                return column;
+            }
+        }
+
+        throw new IllegalStateException("No primary key found for table " + tableName);
+    }
+
     public void insert(Object object){
         DBInterface dbInterface = ORMEngine.getInstance().getDbInterface();
         dbInterface.insert(this, object);
+    }
+
+    public void update(Object object){
+        DBInterface dbInterface = ORMEngine.getInstance().getDbInterface();
+        dbInterface.update(this, object);
+    }
+
+    public void delete(Object object){
+        DBInterface dbInterface = ORMEngine.getInstance().getDbInterface();
+        dbInterface.delete(this, object);
     }
 
 
