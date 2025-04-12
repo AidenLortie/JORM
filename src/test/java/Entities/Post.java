@@ -23,4 +23,13 @@ public class Post {
         this.author = author;
         this.title = title;
     }
+
+    @Override
+    public String toString() {
+        return "Post{" +
+                "id=" + id +
+                ", author=" + author.toString() +
+                ", title='" + title + '\'' +
+                '}';
+    }
 }

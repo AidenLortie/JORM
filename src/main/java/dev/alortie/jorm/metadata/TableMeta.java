@@ -1,13 +1,9 @@
 package dev.alortie.jorm.metadata;
 
-import dev.alortie.jorm.core.ORMEngine;
-import dev.alortie.jorm.utils.DBInterface;
+import dev.alortie.jorm.core.JORM;
+import dev.alortie.jorm.core.QueryBuilder;
+import dev.alortie.jorm.utils.JORMAdapter;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class TableMeta<T> {
@@ -47,25 +43,33 @@ public class TableMeta<T> {
     }
 
     public void insert(Object object){
-        DBInterface dbInterface = ORMEngine.getInstance().getDbInterface();
-        dbInterface.insert(this, object);
+        JORMAdapter JORMAdapter = JORM.getInstance().getAdapter();
+        JORMAdapter.insert(this, object);
     }
 
     public void update(Object object){
-        DBInterface dbInterface = ORMEngine.getInstance().getDbInterface();
-        dbInterface.update(this, object);
+        JORMAdapter JORMAdapter = JORM.getInstance().getAdapter();
+        JORMAdapter.update(this, object);
     }
 
     public void delete(Object object){
-        DBInterface dbInterface = ORMEngine.getInstance().getDbInterface();
-        dbInterface.delete(this, object);
+        JORMAdapter JORMAdapter = JORM.getInstance().getAdapter();
+        JORMAdapter.delete(this, object);
     }
 
 
-    @SuppressWarnings("unchecked")
     public List<T> selectAll() {
-        DBInterface dbInterface = ORMEngine.getInstance().getDbInterface();
-        return dbInterface.selectAll(this);
+        JORMAdapter JORMAdapter = JORM.getInstance().getAdapter();
+        return JORMAdapter.selectAll(this);
+    }
+
+    public T selectById(Object id) {
+        JORMAdapter JORMAdapter = JORM.getInstance().getAdapter();
+        return (T) JORMAdapter.selectById(this, id);
+    }
+
+    public QueryBuilder<T> query() {
+        return new QueryBuilder<>(this);
     }
 
 

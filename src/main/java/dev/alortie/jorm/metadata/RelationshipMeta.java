@@ -8,7 +8,7 @@ public class RelationshipMeta {
         ONE_TO_MANY,
         MANY_TO_MANY
     }
-
+    
     private final Type type;
     private final String foreignKeyFieldName;
     private final Field field;

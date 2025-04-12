@@ -12,4 +12,5 @@ public @interface Column {
     boolean nullable() default true;
     boolean autoIncrement() default false;
     boolean unique() default false;
+    int length() default 255; // 0 for TEXT type
 }

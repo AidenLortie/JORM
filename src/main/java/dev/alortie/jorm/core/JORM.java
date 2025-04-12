@@ -1,59 +1,58 @@
 package dev.alortie.jorm.core;
 
 import dev.alortie.jorm.metadata.TableMeta;
-import dev.alortie.jorm.utils.DBInterface;
+import dev.alortie.jorm.utils.JORMAdapter;
 import dev.alortie.jorm.utils.ReflectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @version 0.0.1
- * @author ALortie
+ * Singleton class that manages the ORM engine.
+ * It initializes the database connection and manages the entities.
  */
-public class ORMEngine {
-    private static ORMEngine instance;
-    private DBInterface dbInterface;
+public class JORM {
+    private static JORM instance;
+    private JORMAdapter JORMAdapter;
     private List<TableMeta<?>> entities;
 
 
-    private ORMEngine() {
+    private JORM() {
         // Private constructor to prevent instantiation
     }
 
     // Initialize the ORMEngine with a DBInterface and a list of entities
-    public static ORMEngine InitInstance(DBInterface dbInterface, List<Class<?>> entities) {
+    public static JORM InitInstance(JORMAdapter JORMAdapter, List<Class<?>> entities) {
         if (instance != null) {
             throw new IllegalStateException("ORMEngine is already initialized.");
         }
-        instance = new ORMEngine();
-        instance.dbInterface = dbInterface;
-        instance.entities = new ArrayList<>();
-        for (Class<?> entity : entities) {
+        instance = new JORM(); // Create a new instance
+        instance.JORMAdapter = JORMAdapter; // Set the DBInterface
+        instance.entities = new ArrayList<>(); // Initialize the entities list
+        for (Class<?> entity : entities) { // Generate TableMeta for each entity
             TableMeta<?> tableMeta = ReflectionUtils.generateTableMeta(entity);
             instance.entities.add(tableMeta);
         }
 
-        instance.initialize();
-        return instance;
+        instance.initialize(); // Initialize the database
+        return instance; // Return the instance
     }
 
-    // Get the singleton instance of ORMEngine
-    public static ORMEngine getInstance() {
+    public static JORM getInstance() {
         if (instance == null) {
             throw new IllegalStateException("ORMEngine is not initialized. Call setInstance() first.");
         }
         return instance;
     }
 
-    // Set the instance of ORMEngine
+    // Initialize db tables
     public void initialize() {
         if (instance == null) {
             throw new IllegalStateException("ORMEngine is not initialized. Call setInstance() first.");
         }
         List<TableMeta<?>> sorted = SchemaManager.sortByDependency(entities);
         for(TableMeta<?> tableMeta : sorted) {
-            dbInterface.createTable(tableMeta);
+            JORMAdapter.createTable(tableMeta);
         }
     }
 
@@ -67,12 +66,14 @@ public class ORMEngine {
         throw new IllegalArgumentException("Entity not found: " + entity.getSimpleName());
     }
 
+    // Placeholder for later use
     public void shutdown() {
-        // Shutdown logic here
+        return;
     }
 
-    public DBInterface getDbInterface() {
-        return dbInterface;
+
+    public JORMAdapter getAdapter() {
+        return JORMAdapter;
     }
 
 

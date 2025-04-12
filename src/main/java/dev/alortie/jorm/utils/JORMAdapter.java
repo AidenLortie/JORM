@@ -4,9 +4,10 @@ import dev.alortie.jorm.metadata.TableMeta;
 
 import java.util.List;
 
-public interface DBInterface {
+public interface JORMAdapter {
 
     void connect();
+
     void disconnect();
 
     void createTable(TableMeta<?> tableMeta);
@@ -19,15 +20,11 @@ public interface DBInterface {
 
     void delete(TableMeta<?> tableMeta, Object entity);
 
-    Object select(TableMeta<?> tableMeta, Object entity);
 
     <T> List<T> selectAll(TableMeta<T> tableMeta);
 
-    Object selectById(TableMeta<?> tableMeta, Object id);
+    <T> T selectById(TableMeta<T> tableMeta, Object primaryKeyValue);
 
-    Object selectByField(TableMeta<?> tableMeta, String fieldName, Object value);
+    <T> List<T> selectWhere(TableMeta<T> tableMeta, String whereClause, Object... params);
 
-    Object selectByFields(TableMeta<?> tableMeta, String[] fieldNames, Object[] values);
-
-    Object selectByCondition(TableMeta<?> tableMeta, String condition, Object[] params);
 }

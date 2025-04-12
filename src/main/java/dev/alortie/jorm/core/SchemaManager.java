@@ -6,6 +6,8 @@ import dev.alortie.jorm.metadata.TableMeta;
 import java.util.*;
 
 public class SchemaManager {
+
+    // Sort tables based on dependencies to ensure related tables are created in the correct order
     public static List<TableMeta<?>> sortByDependency(List<TableMeta<?>> tables){
         Map<String, TableMeta<?>> tableMap = new HashMap<>();
         Map<String, Set<String>> dependencyGraph = new HashMap<>();
@@ -40,6 +42,7 @@ public class SchemaManager {
         return sorted;
     }
 
+    // Depth-first search to detect cycles and sort the tables
     private static void dfs(
             String table,
             Map<String, Set<String>> graph,
@@ -48,23 +51,30 @@ public class SchemaManager {
             Set<String> visiting,
             List<TableMeta<?>> sorted
     ) {
+        // Cycle detection
         if (visiting.contains(table)) {
             throw new RuntimeException("Cycle detected in dependency graph for table: " + table);
         }
 
         if (visited.contains(table)) return;
-
         visiting.add(table);
+
+        // Visit all dependencies
         for (String dep : graph.getOrDefault(table, Collections.emptySet())){
             dfs(dep, graph, tableMap, visited, visiting, sorted);
         }
+        // Mark the current node as visited
         visiting.remove(table);
+
+        // Add the current node to the sorted list
         visited.add(table);
+
+        // Add the table to the sorted list
         sorted.add(tableMap.get(table));
     }
 
+    // Get the table name for an entity class
     public static String getTableNameForEntity(Class<?> clazz) {
-        // Optional: cache this
         if (!clazz.isAnnotationPresent(dev.alortie.jorm.annotations.Entity.class)) {
             throw new RuntimeException("Referenced class " + clazz.getName() + " is not an @Entity");
         }

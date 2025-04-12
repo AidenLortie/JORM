@@ -25,5 +25,14 @@ public class Comment {
         this.post = post;
         this.content = content;
     }
+
+    @Override
+    public String toString() {
+        return "Comment{" +
+                "id=" + id +
+                ", post=" + post.toString() +
+                ", content='" + content + '\'' +
+                '}';
+    }
 }
 

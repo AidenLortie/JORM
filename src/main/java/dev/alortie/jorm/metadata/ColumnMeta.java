@@ -9,7 +9,9 @@ public class ColumnMeta {
     private boolean isForeignKey;
     private boolean autoIncrement;
     private boolean unique;
+    private int length;
     Class<?> referencedEntity;
+
 
     public ColumnMeta(
             String name,
@@ -20,6 +22,7 @@ public class ColumnMeta {
             boolean isForeignKey,
             boolean autoIncrement,
             boolean unique,
+            int length,
             Class<?> referencedEntity
     ) {
         this.name = name;
@@ -30,6 +33,7 @@ public class ColumnMeta {
         this.isForeignKey = isForeignKey;
         this.autoIncrement = autoIncrement;
         this.unique = unique;
+        this.length = length;
         this.referencedEntity = referencedEntity;
     }
 
@@ -95,6 +99,14 @@ public class ColumnMeta {
 
     public void setUnique(boolean unique) {
         this.unique = unique;
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
     }
 
     public Class<?> getReferencedEntity() {
